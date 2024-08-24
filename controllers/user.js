@@ -78,8 +78,6 @@ const sendMails = async (req, res) => {
   }
 };
 
-
-
 const deleteGroup = async (req, res) => {
   const group = await Group.findByIdAndDelete(req.params.id);
   if (!group)
@@ -91,33 +89,23 @@ const deleteGroup = async (req, res) => {
     .send({ success: true, message: "Group deleted successfully" });
 };
 
-const register = async (req,res) => {
-  try{
-     //get the user inputs from the request body
-     const {name, email, password} = req.body;
-
-     //check if the user aleady exists in the database
-     const user = await User.findOne({email});
-
-     //if the use already exists, return an error
-     if(user){
-         return res.status(400).send({message : 'User already exists'});
-     }
-      //hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-     //create a new user
-     const newUser = new User({name,email,password: hashedPassword });
-
-     //save the user to the database
-     const savedUser = await newUser.save();
-
-     //return the user
-     res.status(201).send({message :'User created successfully'});
-
-  }catch(error){
-     res.send({message : error.message})
-  }
+const register = async (req, res) => {
+  const user = new User({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+    password: req.body.password,
+  });
+  if (!user)
+    return res
+      .status(400)
+      .send({ success: false, message: "Registration failed!" });
+  const result = await user.save();
+  if (!result)
+    return res
+      .status(500)
+      .send({ success: false, message: "Registration failed!" });
+  res.status(200).send({ success: true, message: "Registration successfull" });
 };
 
 const login = async (req, res) => {
